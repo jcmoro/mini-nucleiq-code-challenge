@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
 
-from mini_nucleiq.algorithms import Algorithm, AlgorithmResult, Cells, get_algorithm
+from mini_nucleiq.algorithms import AlgorithmResult, Cells, get_algorithm
 
 FinalResult = Literal["POSITIVE", "NEGATIVE"]
 
@@ -27,30 +27,31 @@ def _validate(cells: Cells) -> None:
         raise InvalidSampleError("cells must contain only the integers 0 and 1")
 
 
-def _evaluate(algorithm: Algorithm, cells: Cells) -> AlgorithmResult:
-    positive_cells = algorithm.count(cells)
-    positivity = positive_cells / len(cells)
-    return AlgorithmResult(
-        name=algorithm.name,
-        positive_cells=positive_cells,
-        positivity=positivity,
-        is_positive=positivity > algorithm.threshold,
-    )
-
-
 def analyze(
     cells: Cells,
     algorithm_names: Sequence[str],
     sample_name: str | None = None,
 ) -> SampleAnalysis:
     if not algorithm_names:
-        raise ValueError("at least one algorithm must be selected")
+        raise InvalidSampleError("at least one algorithm must be selected")
     _validate(cells)
 
-    algorithms = [get_algorithm(name) for name in algorithm_names]
-    results = tuple(_evaluate(algorithm, cells) for algorithm in algorithms)
+    results = []
+    for name in algorithm_names:
+        algorithm = get_algorithm(name)
+        positive_cells = algorithm.count(cells)
+        positivity = positive_cells / len(cells)
+        results.append(
+            AlgorithmResult(
+                name=algorithm.name,
+                positive_cells=positive_cells,
+                positivity=positivity,
+                is_positive=positivity > algorithm.threshold,
+            )
+        )
 
-    positive_count = sum(1 for result in results if result.is_positive)
-    final: FinalResult = "POSITIVE" if positive_count * 2 > len(results) else "NEGATIVE"
+    positive_algorithms = sum(1 for result in results if result.is_positive)
+    is_majority = positive_algorithms > len(results) / 2
+    final: FinalResult = "POSITIVE" if is_majority else "NEGATIVE"
 
-    return SampleAnalysis(results=results, final=final, sample_name=sample_name)
+    return SampleAnalysis(results=tuple(results), final=final, sample_name=sample_name)

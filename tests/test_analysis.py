@@ -33,6 +33,11 @@ def test_even_zeroes_above_threshold_is_positive() -> None:
     assert (result.positive_cells, result.positivity, result.is_positive) == (4, 0.4, True)
 
 
+def test_contiguous_ones_at_exact_threshold_is_negative() -> None:
+    result = _by_name(analyze(SAMPLE_C, ["contiguous-ones"]), "contiguous-ones")
+    assert (result.positive_cells, result.positivity, result.is_positive) == (2, 0.2, False)
+
+
 def test_surrounded_ones_above_threshold_is_positive() -> None:
     result = _by_name(analyze(SAMPLE_C, ["surrounded-ones"]), "surrounded-ones")
     assert (result.positive_cells, result.is_positive) == (2, True)
@@ -130,5 +135,5 @@ def test_non_integer_cells_are_rejected(cells: list) -> None:
 
 
 def test_empty_algorithm_selection_is_rejected() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidSampleError):
         analyze(SAMPLE_A, [])
