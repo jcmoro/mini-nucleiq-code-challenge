@@ -1,3 +1,15 @@
+## How to run
+
+Requires Python 3.11+.
+
+```bash
+make install        # create .venv and install the package with dev deps
+make check          # run all quality gates (lint, format, type-check, tests)
+make demo           # analyze the sample data against the live Samples API
+```
+Individual gates are also available: `make test`, `make lint`, `make format`, `make typecheck`.
+
+
 # CellsIA's Code Challenge
 
 In the real world, a tissue sample (for example from a biopsy of a breast tumour) is prepared in the lab, sliced into very thin sections, stained, and photographed at very high resolution. The resulting digital image is called a whole-slide image, or WSI. Pathologists review these images to look for clinically relevant biological markers, such as proteins, receptors, proliferation markers, or staining patterns.
